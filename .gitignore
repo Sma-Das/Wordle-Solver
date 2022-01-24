@@ -1,3 +1,9 @@
+# workspace files
+.idea
+
+# wordlist file
+*wordlist.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
