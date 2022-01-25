@@ -17,6 +17,9 @@ class Wordlist:
             lambda w: all(l in lowercase for l in w),
         ]
 
+    def __iter__(self):
+        yield from self.wordlist
+
     @staticmethod
     def read_file(filename: str) -> list[str]:
         with open(filename, "r") as wordlist:
@@ -59,13 +62,14 @@ class Solver:
     def __init__(self, filename: str = FILENAME):
         self.wordlist = Wordlist(filename)
         self.wordlist.filter_wordlist(use_default_filters=True)
+
         self.filters = []
         self.known_letters = set()
         self.frequency_table = {}
 
     @staticmethod
     def calculate_best_word(wordlist: Wordlist, heuristic: callable):
-        return max(wordlist.wordlist, key=heuristic)
+        return max(wordlist, key=heuristic)
 
     @staticmethod
     def valid_position(letter: str, position: int) -> callable:
@@ -80,12 +84,14 @@ class Solver:
         return lambda w: letter not in w
 
     def frequency_analysis(self):
-        combined_wordlist = "".join(self.wordlist.wordlist)
+        combined_wordlist = "".join(self.wordlist)
         self.frequency_table = {
             letter: combined_wordlist.count(letter) for letter in lowercase
         }
 
     def handle_result(self, word: str, result: str) -> list[callable]:
+        if len(result) > self.wordlist.WORD_SIZE:
+            raise ValueError(f"{result} exceeds word size: {self.wordlist.WORD_SIZE}")
         for i, (letter, response) in enumerate(zip(word, result)):
             match response:
                 case self.INVALID:
@@ -107,6 +113,10 @@ class Solver:
             heuristic = lambda w: sum(
                 (self.frequency_table[letter] for letter in {*w})
             )
+
+        print(f"{self.KNOWN} if the letter is in the correct position")
+        print(f"{self.UNKNOWN} if the letter is in the incorrect position")
+        print(f"{self.INVALID} if the letter is not in the word")
 
         while True:
             self.wordlist.filter_wordlist(self.filters, use_default_filters=False)
