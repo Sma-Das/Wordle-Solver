@@ -1,3 +1,4 @@
+#usr/bin/env python3.10
 """
 A simple Wordle solver designed in python3.10
 @author InfernoCheese
