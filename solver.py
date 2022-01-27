@@ -5,7 +5,9 @@ A simple Wordle solver designed in python3.10
 """
 
 from string import ascii_lowercase as lowercase
+from typing import Generator, Callable
 
+function = type(type)
 
 class Wordlist:
     WORD_SIZE: int = 5
@@ -30,7 +32,7 @@ class Wordlist:
                 .split("\n")
 
     @staticmethod
-    def remove_invalid(wordlist: set[str], filters: list[callable]) -> set[str]:
+    def remove_invalid(wordlist: set[str], filters: list[function]) -> set[str]:
         return {
             word for word in wordlist
             if all(
@@ -69,19 +71,19 @@ class Solver:
         self.frequency_table = {}
 
     @staticmethod
-    def calculate_best_word(wordlist: Wordlist, heuristic: callable):
+    def calculate_best_word(wordlist: Wordlist, heuristic: function):
         return max(wordlist, key=heuristic)
 
     @staticmethod
-    def valid_position(letter: str, position: int) -> callable:
+    def valid_position(letter: str, position: int) -> function:
         return lambda w: w[position] == letter
 
     @staticmethod
-    def invalid_position(letter: str, position) -> callable:
+    def invalid_position(letter: str, position) -> function:
         return lambda w: letter in w and not w[position] == letter
 
     @staticmethod
-    def invalid_letter(letter: str) -> callable:
+    def invalid_letter(letter: str) -> function:
         return lambda w: letter not in w
 
     def frequency_analysis(self):
@@ -90,7 +92,7 @@ class Solver:
             letter: combined_wordlist.count(letter) for letter in lowercase
         }
 
-    def handle_result(self, word: str, result: str) -> list[callable]:
+    def handle_result(self, word: str, result: str) -> Generator[function, function, function]:
         if len(result) > self.wordlist.WORD_SIZE:
             raise ValueError(f"{result} exceeds word size: {self.wordlist.WORD_SIZE}")
         for i, (letter, response) in enumerate(zip(word, result)):
@@ -108,7 +110,7 @@ class Solver:
                 case _:
                     raise ValueError(f"Unknown symbol {response}")
 
-    def solve(self, heuristic: callable = None):
+    def solve(self, heuristic: function = None):
 
         if heuristic is None:
             heuristic = lambda w: sum(
